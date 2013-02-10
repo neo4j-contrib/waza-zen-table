@@ -26,6 +26,8 @@ app.configure('development', function(){
 
 var table = process.env.ZEN_TABLE||'/dev/tty.usbserial'
 
+var last = { x: 0, y: 0};
+
 function writeTable(command,fun) {
 	console.log("writing",command);
 	fs.writeFile(table, command, function(x) {
@@ -45,6 +47,9 @@ var dim = { x : 2700, y:2060 }
 function normalize(x,max) {
 	return Math.max(10.0,Math.min(x, max)) / 10.0;
 }
+function distance (x,y) {
+	return Math.sqrt((x-last.x)*(x-last.x)+(y-last.y)*(y-last.y));
+}
 app.post('/', function(req,res) {
 	var action=req.param("action");
 	if (action=="home") {
@@ -52,12 +57,18 @@ app.post('/', function(req,res) {
 	}
 	var x=normalize(parseInt(req.param("x")),dim.x);
 	var y=normalize(parseInt(req.param("y")),dim.y);
+	if (distance(x,y)<5) {
+		last.x=x;last.y=y;
+		return res.send(200,"Not moved");
+	}
+	last.x=x;last.y=y;
 	if (action=="move") {
 		return writeTable("Robot.MoveTo("+x+","+y+")",tableResponse(res));
 	}
 	if (action=="line") {
 		return writeTable("Robot.LineToSmooth("+x+","+y+")",tableResponse(res));
 	}
+	return res.send(404,"Unknown command "+res.url);
 });
 
 http.createServer(app).listen(app.get('port'), function(){

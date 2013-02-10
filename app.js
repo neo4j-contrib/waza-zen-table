@@ -36,6 +36,30 @@ app.get('/draw', routes.draw);
 
 var current_session = null;
 var ZEN_TABLE_HOST=process.env.ZEN_TABLE_HOST||"localhost";
+var BAMBUSER_API_KEY=process.env.BAMBUSER_API_KEY
+
+app.locals.bambuser_video=null;
+
+http.get({host:"api.bambuser.com", path: "/broadcast.json?username=neo4j&type=live&limit=3&api_key="+BAMBUSER_API_KEY}, function(res) {
+	if (res.statusCode==200) {
+		res.setEncoding('utf-8');
+		var content="";
+		res.on('data',function(data) { content += data.toString(); })
+		res.on('end',function() { 
+			var data=JSON.parse(content)['result']; 
+			if (data) {
+			  data
+			   .filter(function(vid) { return vid.title.match("[Zz]en") })
+			   .sort(function(v1,v2) {return v2.created - v1.created })
+			   .forEach(function(vid) { app.locals.bambuser_video=vid.vid; });
+			   console.log(app.locals.bambuser_video)
+			}
+		})
+	}
+}).end();
+
+// session id as key, array of commands as values, to replay and also for websocket push to all clients
+var sessions = {}
 
 app.post('/table', function(req,res) {
 	// todo session handling, only one session active ever 5 mins or until it sent end !

@@ -1,5 +1,6 @@
 <html>
 <head>
+	<title>Sand Drawing - Heroku Waza Zen Table</title>
 	<script src="/assets/javascripts/jquery-1.8.1.min.js"></script>
 	<script src="/assets/javascripts/touch.js"></script>
 
@@ -97,7 +98,10 @@
 </head>
 	<body>
 		<!--style="min-width:1375;min-height:1030px;"-->
-
+		<% if ( bambuser_video ) { %>
+			<iframe src="http://embed.bambuser.com/broadcast/<%= bambuser_video %>?autoplay=1&amp;mute=1" 
+			 width="460" height="310" frameborder="0" style="position:absolute;top:10px;right:10px;"></iframe>
+		<% } %>
 		<canvas id="id" width="1375" height="1030" ></canvas>
 	</body>
 </html>
