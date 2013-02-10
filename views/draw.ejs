@@ -1,0 +1,100 @@
+<html>
+<head>
+	<script src="/assets/javascripts/jquery-1.8.1.min.js"></script>
+	<script src="/assets/javascripts/touch.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+	$(document).ready(function() {
+	// Zen Desktop [270mm x 206mm]
+	// Zen Coffee Table [1073mm x 647mm]
+	function log(name) {
+		console.log(name,drag.length,drag.pageX,drag.pageY,drag);
+	}
+	function initContext(id) {
+    	var canvas = document.getElementById(id);
+        var context = canvas.getContext('2d');
+    	      var grd = context.createRadialGradient(0, 0, 3, 0, 0, 10);
+    	      grd.addColorStop(0, 'rgba(128,128,128,0.5)');
+    	      grd.addColorStop(1, 'rgba(128,128,128,0.25)');
+    	      context.strokeStyle = grd;
+    		  context.lineWidth = 15;
+    		  context.lineCap = 'butt';
+    //		  context.lineCap = 'round';
+    //    context.strokeStyle = 'rgba(255,255,255,0.2)';
+		return context;
+    }
+
+	var drag=null;
+	var context=initContext('id')
+	function line(x,y,x2,y2) {
+		console.log(x,y,x2,y2);
+		context.beginPath();
+	    context.moveTo(x, y);
+	    context.lineTo(x2, y2);
+	    context.stroke();
+	}
+	function update(event) {
+		if (drag==null) {
+			drag={startX:event.pageX,startY:event.pageY};
+		}
+		drag.pageX=event.pageX;
+		drag.pageY=event.pageY;
+		drag.deltaX=event.pageX-drag.startX;
+		drag.deltaY=event.pageY-drag.startY;
+  	    drag.length=Math.sqrt(drag.deltaX*drag.deltaX+drag.deltaY*drag.deltaY);
+	}
+	function send (action,x,y) {
+		$.post("/table?action="+action+"&x="+x+"&y="+y,function(res) {
+			console.log("Res of "+action,res)
+		})
+	}
+	$( "#id" ).on( TouchMouseEvent.DOWN,  function(event) {
+		update(event);
+		log("down");
+	});
+	$( "#id" ).on( TouchMouseEvent.MOVE,  function(event) {
+		if (drag) {
+			update(event);
+			// call callback, when delta 
+			// $("<div class='pen'></div>").appendTo($('#id')).css({top:drag.pageY,left:drag.pageX})
+			if (drag.length>20) {
+				line(drag.startX,drag.startY,drag.pageX,drag.pageY);
+				send("line",drag.pageX,drag.pageY);
+				log("move");
+				drag=null;
+				update(event);
+			}
+		} else {
+//			console.log("move")
+		}
+	});
+    $("#id").on(TouchMouseEvent.UP, function(event) {
+		// call callback
+		log("up");
+		drag=null;
+	});	
+	});
+</script>
+<style type="text/css" media="screen">
+	body {
+		width : 100%;
+		height: 100%;
+		margin: 0px;
+	}
+	#id {
+		background: url("/assets/img/sand.gif") repeat; 
+		margin: 0px;
+	}
+	.pen {
+		position:absolute;
+		z-index:1;
+		background-color: brown;
+		width:10px;
+		height:10px;
+	}
+</style>
+</head>
+	<body>
+		<canvas id="id" width="1375" height="1030"></canvas>
+	</body>
+</html>

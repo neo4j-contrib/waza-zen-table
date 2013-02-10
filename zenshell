@@ -1,0 +1,19 @@
+#!/bin/bash
+
+DEV=/dev/ttyUSB0
+
+function send() {
+
+   echo -e "\n$*\n" > $DEV
+   TMOUT=1 read result < $DEV
+   echo "= $result"
+
+}
+
+if [ "$*" == "" ]; then
+  while read -e -p "zen> " line;do 
+    send $line
+  done
+else
+  send $*
+fi
