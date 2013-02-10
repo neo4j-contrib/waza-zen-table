@@ -21,8 +21,8 @@
         
         var touchMouseEvent = normalizeEvent(type, event, event.pageX, event.pageY);      
         $(event.target).trigger(touchMouseEvent); 
+		event.preventDefault();
     }
-    
     var onTouchEvent = function(event) {
         console.log(touchMouseEvent)
         var type;
@@ -43,6 +43,7 @@
         else 
             touchMouseEvent = normalizeEvent(type, event, touch.pageX, touch.pageY);
         $(event.target).trigger(touchMouseEvent); 
+		event.preventDefault();
     }
     
     /* == NORMALIZE == */
