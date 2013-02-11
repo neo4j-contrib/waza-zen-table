@@ -28,18 +28,54 @@ var table = process.env.ZEN_TABLE||'/dev/tty.usbserial'
 
 var last = { x: 0, y: 0};
 
+function writeToDeviceSynch(device,command) {
+    var buf = new Buffer("\n"+command+"\n", 'ascii');
+
+    console.log ("Writing "+command+" to " + device);
+
+    var fd = fs.openSync (device, 'r+');
+    var bytesWritten = 0;
+    if (fd) {
+        try {
+            bytesWritten = fs.writeSync (fd, buf, 0, buf.length, -1);
+
+	        if (bytesWritten) {
+	            console.log ("Wrote "+command+" to "+device);
+			    var read=new Buffer(100,'ascii');
+				var bytesRead=fs.readSync(fd,read,0,100,-1);
+		        fs.closeSync (fd);
+				console.log("Read "+read.toString()+" "+bytesRead);
+			    return true;
+	        }
+	        else {
+	            console.log ("An error occured writing to "+device);
+				return false;
+	        }
+        }
+        catch (e) {
+            fs.closeSync (fd);
+            console.log ('Error Writing to file: '+ device,e);
+            return false;
+        }
+    }
+    else {
+        console.log ("An error occured while opening "+device);
+		return false;
+    }
+}
+
 function writeTable(command,fun) {
-	console.log("writing",command);
-	fs.writeFile(table, command, function(x) {
-		console.log("write-result",x);
-	})
-	fs.readFile(table,fun);
+	var succ=writeToDeviceSynch(table,command);
+	fun(succ);
 }
 
 function tableResponse(res) {
-	return function(text) {
-		console.log("read",text);
-		res.send(200,text);
+	return function(succ) {
+		if (succ) {
+			res.send(200,"Ok");
+		} else {
+			res.send(500,"Error writing "+command);
+		}
 	}
 }
 
