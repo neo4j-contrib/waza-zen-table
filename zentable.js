@@ -83,6 +83,8 @@ var dim = { x : 2700, y:2060 }
 function normalize(x,max) {
 	return Math.max(10.0,Math.min(x, max)) / 10.0;
 }
+var dimTable={x:normalize(dim.x,dim.x),y:normalize(dim.y,dim.y)}
+
 function distance (x,y) {
 	return Math.sqrt((x-last.x)*(x-last.x)+(y-last.y)*(y-last.y));
 }
@@ -95,13 +97,17 @@ app.post('/', function(req,res) {
 	}
 	var x=normalize(parseInt(req.param("x")),dim.x);
 	var y=normalize(parseInt(req.param("y")),dim.y);
+	var lastCopy={x:last.x,y:last.y};
 	if (distance(x,y)<not_move_delta) {
 		last.x=x;last.y=y;
 		return res.send(200,"Not moved");
 	}
 	last.x=x;last.y=y;
 	if (action=="move") {
-		return writeTable("Robot.MoveTo("+x+","+y+")",tableResponse(res));
+		var borderY=(y<dimTable.y-y) ? 0 : dimTable.y;
+		return writeTable("Robot.MoveTo("+lastCopy.x+","+borderY+")\n"+
+						  "Robot.MoveTo("+x+","+borderY+")\n"+
+						  "Robot.MoveTo("+x+","+y+")\n",tableResponse(res));
 	}
 	if (action=="line") {
 		return writeTable("Robot.LineToSmooth("+x+","+y+")",tableResponse(res));
