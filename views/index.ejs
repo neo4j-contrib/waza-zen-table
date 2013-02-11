@@ -1,13 +1,60 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>Welcome - Heroku Waza Zen Table</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
-    <script type="text/javascript" src="/javascripts/jquery-1.8.1.min.js"></script>
+    <script type="text/javascript" src="/assets/javascripts/jquery-1.8.1.min.js"></script>
     <!--script type="text/javascript" src="/javascripts/modernizr.js"></script-->
+	<style type="text/css" media="screen">
+		a:hover, a:visited, a:active, a {
+			color:#906dcf;
+			text-decoration:none;
+		}
+		body {
+			background-image:url(assets/img/sand.gif);
+			color:black
+		}
+		#waza {
+			position:absolute;right:10px;top:0px;
+		}
+		#neo4j {
+			position:absolute;left:10px;top:0px;
+		}
+		.main {
+			width:80%;
+			margin-left:auto;
+			margin-right:auto;
+			padding:5%;
+			background-color:rgba(200,200,200,0.4);
+		}
+	</style>
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+	<img src="https://waza.heroku.com/images/layout/waza-bookmark.png" id="waza"></img>
+	<img src="/assets/img/neo4j_logo.gif" id="neo4j"></img>
+<div class="main">
+	    <h1>Welcome - Heroku Waza Zen Table</h1>
+    <p>The Zen Table is an unique mash-up of art and technology. 
+	<a href="http://twitter.com/fnbrit" target="_blank">Simon Hallam</a> put the <a href="http://www.kickstarter.com/projects/fnbrit/zen-table" target="_blank">traditional zen garden into a desktop or coffee-table</a> and then made it work automatically.</p>
+	<blockquote>
+		Zen-Table is an ingenious mechanism consisting of a microcontroller, strong neodynium magnets and a plotter like mechanism to move the "drawing head" across sand on top of a coffee- or desktop-table. Of course the table is programmable. It allows for static images from a SD-card to be drawn in the sand and also dynamic renderings via an USB-port.
+	</blockquote>
+	<img src="http://3.bp.blogspot.com/-bsaqXwHW8vY/UHl5rGNbiVI/AAAAAAAAAFI/iZvFz0VGGC8/s400/zen-table-desktop.png"></img>
+	<p>Put your own mark onto the Zen Table by <a href="/draw">drawing a symbol on your computer or mobile device.</a>
+	As multiple people want to draw at the same time, you'll be given a token that is claimed as soon as there is a free spot.
+	</p>
+	<img src="http://4.bp.blogspot.com/-h_RcVxvvupo/UHl5rgmOBEI/AAAAAAAAAFU/ZxBRWVyEY6Q/s400/heroku_zentable.jpg"></img>
+	<% if ( bambuser_video ) { %>
+		<iframe src="http://embed.bambuser.com/broadcast/<%= bambuser_video %>?autoplay=1&amp;mute=1" 
+		 width="460" height="310" frameborder="0"></iframe>
+	<% } %>
+	<h3>Resources</h3>
+	<ul>
+		<li><a href="https://github.com/neo4j-contrib/waza-zen-table">SourceCode on GitHub</a></li>
+		<li><a href="http://zen-table.com">Zen-Table.com with tools to create table-scripts from images and javascript</a></li>
+		<li><a href="http://www.kickstarter.com/projects/fnbrit/zen-table">Kickstarter Project</a></li>
+		<li><a href="http://blog.neo4j.org/2012/10/zen-graph-visualizations-what-can-you-do.html">Neo4j Blog Post with unboxing video</a></li>
+		<li><a href="http://bambuser.com/neo4j">Live Stream</a></li>
+	</ul>
+</div>  </body>
 </html>
