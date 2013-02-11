@@ -38,7 +38,7 @@ var current_session = null;
 var ZEN_TABLE_HOST=process.env.ZEN_TABLE_HOST||"localhost";
 var BAMBUSER_API_KEY=process.env.BAMBUSER_API_KEY
 
-app.locals.bambuser_video=null;
+app.locals.bambuser_video	=null;
 
 http.get({host:"api.bambuser.com", path: "/broadcast.json?username=neo4j&type=live&limit=3&api_key="+BAMBUSER_API_KEY}, function(res) {
 	if (res.statusCode==200) {

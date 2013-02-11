@@ -41,8 +41,8 @@ function writeToDeviceSynch(device,command) {
 
 	        if (bytesWritten) {
 	            console.log ("Wrote "+command+" to "+device);
-			    var read=new Buffer(100,'ascii');
-				var bytesRead=fs.readSync(fd,read,0,100,-1);
+			    var read=new Buffer(10,'ascii');
+				var bytesRead=fs.readSync(fd,read,0,4,-1);
 		        fs.closeSync (fd);
 				console.log("Read "+read.toString()+" "+bytesRead);
 			    return true;
@@ -86,6 +86,8 @@ function normalize(x,max) {
 function distance (x,y) {
 	return Math.sqrt((x-last.x)*(x-last.x)+(y-last.y)*(y-last.y));
 }
+var not_move_delta=1;
+
 app.post('/', function(req,res) {
 	var action=req.param("action");
 	if (action=="home") {
@@ -93,7 +95,7 @@ app.post('/', function(req,res) {
 	}
 	var x=normalize(parseInt(req.param("x")),dim.x);
 	var y=normalize(parseInt(req.param("y")),dim.y);
-	if (distance(x,y)<5) {
+	if (distance(x,y)<not_move_delta) {
 		last.x=x;last.y=y;
 		return res.send(200,"Not moved");
 	}

@@ -5,9 +5,22 @@
 	<script src="/assets/javascripts/touch.js"></script>
 
 <script type="text/javascript" charset="utf-8">
+// Zen Desktop [270mm x 206mm]
+// Zen Coffee Table [1073mm x 647mm]
+	var table={w:2700,h:2060},zoom,size;
+	var context;
+	
 	$(document).ready(function() {
-	// Zen Desktop [270mm x 206mm]
-	// Zen Coffee Table [1073mm x 647mm]
+	  function handleResize() {
+ 		size={w:$(window).width(),h:$(window).height()}
+		$("#id").attr("width", size.w).attr("height",size.h);
+		zoom=Math.min(table.w/size.w, table.h/size.h)
+		context=initContext('id');
+		console.log(zoom,size.w,size.h);
+	  }	
+	  handleResize();
+	  $(window).resize(handleResize);
+	
 	function log(name) {
 		console.log(name,drag.length,drag.pageX,drag.pageY,drag);
 	}
@@ -26,7 +39,7 @@
     }
 
 	var drag=null;
-	var context=initContext('id')
+	context=initContext('id')
 	function line(x,y,x2,y2) {
 		console.log(x,y,x2,y2);
 		context.beginPath();
@@ -45,7 +58,9 @@
   	    drag.length=Math.sqrt(drag.deltaX*drag.deltaX+drag.deltaY*drag.deltaY);
 	}
 	function send (action,x,y) {
-		$.post("/table?action="+action+"&x="+x+"&y="+y,function(res) {
+		var cx=zoom*x;
+		var cy=zoom*y;
+		$.post("/table?action="+action+"&x="+cx+"&y="+cy,function(res) {
 			console.log("Res of "+action,res)
 		})
 	}
@@ -53,7 +68,9 @@
 	$( "#id" ).on( TouchMouseEvent.DOWN,  function(event) {
 		update(event);
 		log("down");
+		send("move",drag.startX,drag.startY);
 	});
+	
 	$( "#id" ).on( TouchMouseEvent.MOVE,  function(event) {
 		if (drag) {
 			update(event);
