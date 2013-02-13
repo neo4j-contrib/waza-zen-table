@@ -4,7 +4,7 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
+  , routes = require('./routes/routes')
   , http = require('http')
   , path = require('path')
   , fs = require('fs')
@@ -34,7 +34,6 @@ app.configure('development', function(){
 app.get('/', routes.index);
 app.get('/draw', routes.draw);
 
-var current_session = null;
 var ZEN_TABLE_HOST=process.env.ZEN_TABLE_HOST||"localhost";
 var BAMBUSER_API_KEY=process.env.BAMBUSER_API_KEY
 
@@ -59,11 +58,14 @@ http.get({host:"api.bambuser.com", path: "/broadcast.json?username=neo4j&type=li
 }).end();
 
 // session id as key, array of commands as values, to replay and also for websocket push to all clients
-var sessions = {}
 
-app.post('/table', function(req,res) {
-	// todo session handling, only one session active ever 5 mins or until it sent end !
-	var session=req.param("session");
+app.put("/session",routes.new_session);
+app.put('/session/:session', routes.make_active)
+app.post('/session/:session', routes.add_data)
+app.get('/session/:session', routes.get_data)
+app.get('/session', routes.get_active_data)
+
+function forward_commands(req,res) {
 	var suffix = req.url.split(/\?/)[1];
 	var opts = { host: ZEN_TABLE_HOST , port:3001, path : "/?" + suffix, method:"POST"}
 	console.log("Sending",opts)
@@ -85,7 +87,7 @@ app.post('/table', function(req,res) {
 		 res.send(500,err) 
 	})
 	req2.end();
-})
+}
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });

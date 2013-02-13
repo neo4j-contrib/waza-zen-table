@@ -43,7 +43,6 @@
         else 
             touchMouseEvent = normalizeEvent(type, event, touch.pageX, touch.pageY);
         $(event.target).trigger(touchMouseEvent); 
-		event.preventDefault();
     }
     
     /* == NORMALIZE == */

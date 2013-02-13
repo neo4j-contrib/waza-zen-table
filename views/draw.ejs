@@ -9,8 +9,32 @@
 // Zen Coffee Table [1073mm x 647mm]
 	var table={w:2700,h:2060},zoom,size;
 	var context;
-	
+	var session;
+	var active;
 	$(document).ready(function() {
+		function checkStatus() {
+		  $.ajax("/session/"+session,{dataType:'json',type:"PUT", success:function(res) {
+			console.log(res);
+			active=res.active;
+			if (session==active) {
+				$("#live").addClass("active").text("Live: "+active);
+			} else {
+				$("#live").addClass("inactive").text("Live: "+active+" ( Me: "+session+")");
+			}
+		}})
+	};
+	
+	  $.ajax("/session",{dataType:'json',type:"PUT", success:function(res) {
+		console.log(res);
+		session=res.id;
+		active=res.active;
+		if (session==active) {
+			$("#live").addClass("active").text("Live: "+active);
+		} else {
+			$("#live").addClass("inactive").text("Live: "+active+" ( Me: "+session+")");
+		}
+		setInterval(checkStatus,30000);
+	  }});
 	  function handleResize() {
  		size={w:$(window).width(),h:$(window).height()}
 		$("#id").attr("width", size.w).attr("height",size.h);
@@ -60,23 +84,39 @@
 	function send (action,x,y) {
 		var cx=zoom*x;
 		var cy=zoom*y;
-		$.post("/table?action="+action+"&x="+cx+"&y="+cy,function(res) {
-			console.log("Res of "+action,res)
+		var commands=[{action:action,x:cy,y:cy}];
+		$.ajax("/session/"+session, {
+			type : "POST",
+			dataType: "json",
+			contentType: "application/json",
+			processData: false,
+			data: JSON.stringify(commands),
+			success: function(res) {
+				console.log("Res of "+action,res)
+			},
+			error: function(xhr,status,err) {
+				console.log("Error of "+action,err,status)
+			}
 		})
 	}
 
 	$( "#id" ).on( TouchMouseEvent.DOWN,  function(event) {
+		if (active!=session) return;
+		event.preventDefault();
 		update(event);
 		log("down");
 		send("move",drag.startX,drag.startY);
 	});
 	
 	$( "#id" ).on( TouchMouseEvent.MOVE,  function(event) {
+		if (active!=session) return;
+		event.preventDefault();
 		if (drag) {
 			update(event);
 			// call callback, when delta 
 			// $("<div class='pen'></div>").appendTo($('#id')).css({top:drag.pageY,left:drag.pageX})
 			if (drag.length>20) {
+				console.log(drag)
 				line(drag.startX,drag.startY,drag.pageX,drag.pageY);
 				send("line",drag.pageX,drag.pageY);
 				log("move");
@@ -88,6 +128,8 @@
 		}
 	});
     $("#id").on(TouchMouseEvent.UP, function(event) {
+		if (active!=session) return;
+		event.preventDefault();
 		// call callback
 		log("up");
 		drag=null;
@@ -111,6 +153,17 @@
 		width:10px;
 		height:10px;
 	}
+	#live {
+		position:absolute;
+		z-index:1;
+		left:5px;top:5px;
+	}
+	.inactive {
+		background-color:lightgray;
+	}
+	.active {
+		background-color:red;
+	}
 </style>
 </head>
 	<body>
@@ -120,5 +173,6 @@
 			 width="460" height="310" frameborder="0" style="position:absolute;top:10px;right:10px;"></iframe>
 		<% } %>
 		<canvas id="id" width="1375" height="1030" ></canvas>
+		<button id="live">Live</button>
 	</body>
 </html>
