@@ -35,6 +35,7 @@ describe('Table', function() {
 	})
     describe("#update()", function() {
    		it('should add data for session', function() {
+               table.update({active:'bar',data:[]});              
                table.update({active:'bar',data:[{action:"home"}]},function(commands) {
                    assert.deepEqual([{action:"home"}],commands)
                })
@@ -42,7 +43,7 @@ describe('Table', function() {
                assert.deepEqual([{action:"home"}],table.__get__('commands'));
 
                table.update({active:'foo',data:[{action:"home"},{action:"line",x:100, y:100}]},function(commands) {
-                   assert.deepEqual([{action:"line",x:100, y:100}],commands)
+                   assert.deepEqual([{action:"home"},{action:"line",x:100, y:100}],commands)
                })
                assert.equal(2,table.__get__('lastCommandIndex'));
                assert.deepEqual([{action:"home"},{action:"line",x:100, y:100}],table.__get__('commands'));
