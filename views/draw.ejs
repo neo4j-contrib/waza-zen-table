@@ -84,7 +84,7 @@
 	function send (action,x,y) {
 		var cx=zoom*x;
 		var cy=zoom*y;
-		var commands=[{action:action,x:cy,y:cy}];
+		var commands=[{action:action,x:cx,y:cy}];
 		$.ajax("/session/"+session, {
 			type : "POST",
 			dataType: "json",

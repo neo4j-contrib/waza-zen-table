@@ -11,7 +11,6 @@ var lastCommandIndex = 0;
 
 // todo async functions, keep fd open for the whole lifetime?
 exports.writeToDeviceSynch = function (device, commands) {
-    console.log("Writing " + commands + " to " + device);
     if (!device || !commands || commands.length==0) return false;
     var fd = fs.openSync(device, 'w+');
     if (!fd) {
@@ -20,13 +19,15 @@ exports.writeToDeviceSynch = function (device, commands) {
     }
     try {
         var bytesWritten = 0;
-        for (var i = 0; i < commands.length; i++) {
-            var buf = new Buffer("\n" + commands[i] + "\n", 'ascii');
-            bytesWritten += fs.writeSync(fd, buf, 0, buf.length, -1);
-        }
+        var buf = new Buffer("\n" + commands[0] + "\n", 'ascii');
+//	    console.log("Writing " + commands[0] + " to " + device);
+        bytesWritten += fs.writeSync(fd, buf, 0, buf.length, -1);
         fs.closeSync(fd);
+	    setTimeout(function() {
+			exports.writeToDeviceSynch(device,commands.slice(1));
+		},1000);
         if (bytesWritten) {
-            console.log("Wrote " + commands + " to " + device);
+		    console.log("Wrote " + commands[0] + " to " + device);
             return true;
         }
         else {
