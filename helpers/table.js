@@ -13,7 +13,7 @@ var lastCommandIndex = 0;
 exports.writeToDeviceSynch = function (device, commands) {
     console.log("Writing " + commands + " to " + device);
     if (!device || !commands || commands.length==0) return false;
-    var fd = fs.openSync(device, 'r+');
+    var fd = fs.openSync(device, 'w+');
     if (!fd) {
         console.log("An error occured while opening " + device);
         return false;
