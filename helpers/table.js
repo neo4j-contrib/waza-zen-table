@@ -99,7 +99,7 @@ var readPort=function(line) {
     console.log("line",line);
     if (line == "<ok>") return;
     if (line.trim()[0]=="{") {
-        var state = JSON.parse(line); // queueSlotsFilled queueSlotsAvailable isMoving
+        var state = JSON.parse(line.replace(/'/g,'"')); // queueSlotsFilled queueSlotsAvailable isMoving
         var timeout = state.queueSlotsAvailable>0 ? 0 : 1000;
         nextActionTimeout = setTimeout(exports.writeNextAction, timeout);
     }
@@ -112,6 +112,7 @@ exports.init=function(device) {
 }
 
 function writeToPort(command,next) {
+    console.log("Writing",command);
     port.write(command+"\n",function(err,written) {
         if (err) {
             console.log("Error writing",command,err);

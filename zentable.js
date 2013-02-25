@@ -37,7 +37,7 @@ function poll() {
         });
     })
 }
-
+poll();
 setInterval(poll,10000);
 
 app.configure('development', function(){
