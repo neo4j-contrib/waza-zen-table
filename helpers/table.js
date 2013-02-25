@@ -95,17 +95,18 @@ exports.writeNextAction = function() {
     getState();
 }
 
+var timeout;
 var readPort=function(line) {
     console.log("line",line);
-    if (line == "<ok>") return;
     if (line.trim()[0]=="{") {
         var state = JSON.parse(line.replace(/'/g,'"')); // queueSlotsFilled queueSlotsAvailable isMoving
         if (state.queueSlotsAvailable>0) {
             exports.writeNextAction();
-        } else {
-            setTimeout(getState,1000);
+            return;
         }
     }
+    clearTimeout(timeout);
+    timeout = setTimeout(getState,1000);
 };
 
 var port;
