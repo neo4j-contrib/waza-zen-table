@@ -33,6 +33,7 @@ The beautiful [Zen-Sand-Coffee-Table](http://www.kickstarter.com/projects/fnbrit
 
 * [Serial Tools (Mac)](http://www.w7ay.net/site/Applications/Serial%20Tools/index.html)
 * [Serial Port Internet](http://playwithmyled.com/internet-to-serial-proxy/)
+* Serial Port with Node.js:  // npm install serialport@1.0.6; npm install -g node-gyp; cd node_modules/serialport;node-gyp configure build
 
 ## Random bits of information
 
