@@ -80,10 +80,10 @@ exports.actionToCommands= function(action) {
     return action;
 }
 
-var nextActionTimeout;
-
+function getState() {
+    writeToPort("Robot.GetState");
+}
 exports.writeNextAction = function() {
-    clearTimeout(nextActionTimeout);
     if (lastWrittenIndex>=commands.length) return;
     var action = commands[lastWrittenIndex];
     lastWrittenIndex++;
@@ -92,7 +92,7 @@ exports.writeNextAction = function() {
     action.commands.forEach(function(command) {
         writeToPort(command);
     });
-    writeToPort("Robot.GetState");
+    getState();
 }
 
 var readPort=function(line) {
@@ -100,8 +100,11 @@ var readPort=function(line) {
     if (line == "<ok>") return;
     if (line.trim()[0]=="{") {
         var state = JSON.parse(line.replace(/'/g,'"')); // queueSlotsFilled queueSlotsAvailable isMoving
-        var timeout = state.queueSlotsAvailable>0 ? 0 : 1000;
-        nextActionTimeout = setTimeout(exports.writeNextAction, timeout);
+        if (state.queueSlotsAvailable>0) {
+            exports.writeNextAction();
+        } else {
+            setTimeout(getState,1000);
+        }
     }
 };
 

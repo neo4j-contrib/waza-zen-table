@@ -32,7 +32,7 @@ function poll() {
 		} 
         var data = JSON.parse(body);
         table.update(data,function(actions) {
-            console.log("Writing actions",actions)
+            // console.log("Writing actions",actions)
             table.writeNextAction()
         });
     })
