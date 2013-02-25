@@ -13,11 +13,11 @@
     "request": "2.12.0",
     "express": "3.0.0rc5",
     "shortid": "1.0.9",
-    "serialport":"1.0.6",
     "ejs": "*"
   },
   "devDependencies": {
     "mocha": "*",
     "rewire": "*"
+    "serialport":"1.0.6",
   }
 }
