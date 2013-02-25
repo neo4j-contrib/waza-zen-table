@@ -22,6 +22,8 @@ app.configure(function(){
 var WEBAPP=process.env.WEBAPP||"http://zen-table.herokuapp.com";
 var device = process.env.ZEN_TABLE || '/dev/ttyUSB0';
 
+table.init(device);
+
 function poll() {
     request(WEBAPP+"/session", { headers: { accept:"application/json"}},function(error, res, body) {
 		if (error) {
@@ -31,7 +33,7 @@ function poll() {
         var data = JSON.parse(body);
         table.update(data,function(actions) {
             console.log("Writing actions",actions)
-            table.writeActions(device,actions)
+            table.writeNextAction()
         });
     })
 }

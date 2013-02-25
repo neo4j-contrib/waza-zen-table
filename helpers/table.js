@@ -1,106 +1,138 @@
-var fs = require('fs');
+var serial = require('./serial')
 
-var dim = { x:2700, y:2060 };
-var dimTable = {x:normalize(dim.x, dim.x), y:normalize(dim.y, dim.y)};
-var not_move_delta = 1;
+var dimTable = { desktop: { width:270, height:206 }, coffee: { width:1063, height:629 }}["desktop"]; // desktop
+var not_move_delta = 2;
 
 var last = { x:0, y:0};
 var session;
 var commands;
 var lastCommandIndex = 0;
-
-// todo async functions, keep fd open for the whole lifetime?
-exports.writeToDeviceSynch = function (device, commands) {
-    if (!device || !commands || commands.length==0) return false;
-    var fd = fs.openSync(device, 'w+');
-    if (!fd) {
-        console.log("An error occured while opening " + device);
-        return false;
-    }
-    try {
-        var bytesWritten = 0;
-        var buf = new Buffer("\n" + commands[0] + "\n", 'ascii');
-//	    console.log("Writing " + commands[0] + " to " + device);
-        bytesWritten += fs.writeSync(fd, buf, 0, buf.length, -1);
-        fs.closeSync(fd);
-	    setTimeout(function() {
-			exports.writeToDeviceSynch(device,commands.slice(1));
-		},1000);
-        if (bytesWritten) {
-		    console.log("Wrote " + commands[0] + " to " + device);
-            return true;
-        }
-        else {
-            console.log("An error occured writing to " + device);
-            return false;
-        }
-    }
-    catch (e) {
-        try {
-            fs.closeSync(fd);
-        } catch(e2) {}
-        console.log('Error Writing to file: ' + device, e);
-        return false;
-    }
-};
-exports.update = function (data, fun) {
-    if (data.active != session) {
-        // clear
-        session = data.active;
-        lastCommandIndex = 0;
-    } else {
-    }
-    commands = data.data;
-    if (fun) fun(commands.slice(lastCommandIndex));
-    lastCommandIndex = commands.length;
-};
-
-exports.writeActions = function (device, actions) {
-    var commands = flatten(actions.map(exports.actionToCommands));
-    exports.writeToDeviceSynch(device, commands);
-    return commands.length;
-};
+var lastWrittenIndex = 0;
+var device='/dev/ttyUSB0';
 
 function flatten(arrays) {
     var merged = [];
     return merged.concat.apply(merged, arrays);
 }
 
+function isValidNumber(value) {
+    return value != undefined && value != null && !isNaN(value);
+}
 function normalize(value, max) {
-    if (value==undefined || value==null) return null;
-    return Math.max(10.0, Math.min(value, max)) / 10.0;
+    if (!isValidNumber(value)) return null;
+    return Math.max(0.0, Math.min(value, max));
 }
 
-function distance(x, y) {
-    return Math.sqrt((x - last.x) * (x - last.x) + (y - last.y) * (y - last.y));
+function distance(p1,p2) {
+    return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
+function routeViaBorder(target,current) {
+    var borderY = (target.y < dimTable.height - target.y) ? 0 : dimTable.height;
+    return [{x:current.x, y: borderY},
+            {x: target.x, y: borderY},
+            {x: target.x, y: target.y}];
+}
+function longDistance(target,current) {
+    var route=routeViaBorder(target,current);
+    return distance(current,route[0])+ distance(route[0],route[1])+distance(route[1],route[2]);
+}
+
+function inRange(p) {
+    if (!isValidNumber(p.x) || !isValidNumber(p.y)) return false;
+    return p.x>=0 && p.x <= dimTable.width && p.y>=0 && p.y <= dimTable.height;
+}
+
 // todo clear, other commands like wait?
 exports.actionToCommands= function(action) {
+    if (typeof action.commands != "undefined") return action;
+    action.commands=[]
     var name = action['action'];
     if (name == "home") {
-        last = { x:0, y:0}; // todo here or in write to device?
-        return ["Robot.Home"];
+        action.x=0;action.y=0;
     }
-    var x = normalize(parseInt(action["x"]), dim.x);
-    var y = normalize(parseInt(action["y"]), dim.y);
-    if (!x || !y) return [];
-    var lastCopy = {x:last.x, y:last.y};
-    if (distance(x, y) < not_move_delta) {
-        last.x = x;
-        last.y = y;
-        return [];
-    }
+    var x = normalize(parseInt(action["x"]), dimTable.width);
+    var y = normalize(parseInt(action["y"]), dimTable.height);
+
+    var target={x:x, y:y};
+    if (!inRange(target)) return action;
+
+    action.target=target;
+    action.last={x:last.x, y:last.y};
+    action.distance = distance(action.target,action.last);
     last.x = x;
     last.y = y;
+
+    action.skip = action.distance < not_move_delta;
+
+    if (name == "home") {
+        action.distance = longDistance(action.target,action.last);
+        action.commands=["Robot.Home"]
+    } else
     if (name == "move") {
-        var borderY = (y < dimTable.y - y) ? 0 : dimTable.y;
-        return ["Robot.MoveTo(" + lastCopy.x + "," + borderY + ")",
-            "Robot.MoveTo(" + x + "," + borderY + ")",
-            "Robot.MoveTo(" + x + "," + y + ")"];
-    }
+        action.distance = longDistance(action.target,action.last);
+        action.commands = ["Robot.MoveTo(" + target.x + "," + target.y + ")"];
+            // routeViaBorder(action.target,action.last).map(function(point) { return "Robot.MoveTo(" + point.x + "," + point.y + ")"; })
+    } else
     if (name == "line") {
-        return ["Robot.LineToSmooth(" + x + "," + y + ")"];
+        action.commands=["Robot.LineTo(" + target.x + "," + target.y + ")"];
     }
-    return [];
+    console.log(action)
+    return action;
 }
 
+var nextActionTimeout;
+
+exports.writeNextAction = function() {
+    clearTimeout(nextActionTimeout);
+    if (lastWrittenIndex>=commands.length) return;
+    var action = commands[lastWrittenIndex];
+    lastWrittenIndex++;
+    var action = exports.actionToCommands(action);
+    if (action.skip) return;
+    action.commands.forEach(function(command) {
+        writeToPort(command);
+    });
+    writeToPort("Robot.GetState");
+}
+
+var readPort=function(line) {
+    console.log("line",line);
+    if (line == "<ok>") return;
+    if (line.trim()[0]=="{") {
+        var state = JSON.parse(line); // queueSlotsFilled queueSlotsAvailable isMoving
+        var timeout = state.queueSlotsAvailable>0 ? 0 : 1000;
+        nextActionTimeout = setTimeout(exports.writeNextAction, timeout);
+    }
+};
+
+var port;
+
+exports.init=function(device) {
+    port=serial.connectPort(device,readPort);
+}
+
+function writeToPort(command,next) {
+    port.write(command+"\n",function(err,written) {
+        if (err) {
+            console.log("Error writing",command,err);
+        }
+        if (next) next();
+    })
+}
+
+exports.update = function (data, fun) {
+    if (data.active != session) {
+        // clear
+        session = data.active;
+        lastCommandIndex = 0;
+        lastWrittenIndex = 0;
+    } else {
+    }
+    commands = data.data;
+    var newCommands = commands.slice(lastCommandIndex);
+    lastCommandIndex = commands.length;
+    if (newCommands.length>0) {
+        newCommands.forEach(exports.actionToCommands);
+        if (fun) fun(newCommands);
+    }
+};
