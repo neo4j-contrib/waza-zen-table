@@ -23,7 +23,6 @@ describe('Routes', function() {
 			var id=routes.new_session(null,{send:function(status,data) {
 				assert.equal(200,status);
 				assert.ok(data.id.length>8);
-				assert.ok(session.hasSession(data.id));
 				assert.deepEqual({id:data.id, active:'foo'},data)
 			}});
 		})

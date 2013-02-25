@@ -21,7 +21,7 @@ describe('Session', function() {
 		it('should return false for non existing sessions', function() {
 			assert.ok(!session.hasSession('foo'));
 		});
-		it('should return a new id not make it active', function() {
+		it('should return a new id make it active', function() {
 			session.active('foo')
 			var id=session.newSession();
 			assert.ok(id.length>8);

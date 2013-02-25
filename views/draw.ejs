@@ -1,178 +1,192 @@
 <html>
 <head>
-	<title>Sand Drawing - Heroku Waza Zen Table</title>
-	<script src="/assets/javascripts/jquery-1.8.1.min.js"></script>
-	<script src="/assets/javascripts/touch.js"></script>
+    <title>Sand Drawing - Heroku Waza Zen Table</title>
+    <script src="/assets/javascripts/jquery-1.8.1.min.js"></script>
+    <script src="/assets/javascripts/touch.js"></script>
 
 <script type="text/javascript" charset="utf-8">
 // Zen Desktop [270mm x 206mm]
 // Zen Coffee Table 1063mm x 629
-	var table={w:270,h:206},zoom,size;
-	var context;
-	var session;
-	var active;
-	$(document).ready(function() {
-		function checkStatus() {
-		  $.ajax("/session/"+session,{dataType:'json',type:"PUT", success:function(res) {
-			console.log(res);
-			active=res.active;
-			if (session==active) {
-				$("#live").addClass("active").text("Live: "+active);
-			} else {
-				$("#live").addClass("inactive").text("Live: "+active+" ( Me: "+session+")");
-			}
-		}})
-	};
-	
-	  $.ajax("/session",{dataType:'json',type:"PUT", success:function(res) {
-		console.log(res);
-		session=res.id;
-		active=res.active;
-		if (session==active) {
-			$("#live").addClass("active").text("Live: "+active);
-		} else {
-			$("#live").addClass("inactive").text("Live: "+active+" ( Me: "+session+")");
-		}
-		setInterval(checkStatus,30000);
-	  }});
-	  function handleResize() {
- 		size={w:$(window).width(),h:$(window).height()}
-		$("#id").attr("width", size.w).attr("height",size.h);
-		zoom=Math.min(table.w/size.w, table.h/size.h)
-		context=initContext('id');
-		console.log(zoom,size.w,size.h);
-	  }	
-	  handleResize();
-	  $(window).resize(handleResize);
-	
-	function log(name) {
-		console.log(name,drag.length,drag.pageX,drag.pageY,drag);
-	}
-	function initContext(id) {
-    	var canvas = document.getElementById(id);
-        var context = canvas.getContext('2d');
-    	      var grd = context.createRadialGradient(0, 0, 3, 0, 0, 10);
-    	      grd.addColorStop(0, 'rgba(128,128,128,0.5)');
-    	      grd.addColorStop(1, 'rgba(128,128,128,0.25)');
-    	      context.strokeStyle = grd;
-    		  context.lineWidth = 15;
-    		  context.lineCap = 'butt';
-    //		  context.lineCap = 'round';
-    //    context.strokeStyle = 'rgba(255,255,255,0.2)';
-		return context;
+    var table={w:270,h:206},zoom,size;
+    var context;
+    var session;
+    var active;
+    $(document).ready(function() {
+
+    function checkStatus() {
+        $.ajax("/session/" + session, {
+            dataType: 'json',
+            type: "PUT",
+            success: function(res) {
+                console.log("checkStatus",res);
+                active = res.active;
+                if (session == active) {
+                    $("#live").addClass("active").text("Live: " + active);
+                } else {
+                    $("#live").addClass("inactive").text("Live: " + active + " ( Me: " + session + ")");
+                }
+            }
+        })
+    };
+        
+    function newSession() {
+      $.ajax("/session",{dataType:'json',type:"PUT", success:function(res) {
+        console.log("newSession",res);
+        session=res.id;
+        active=res.active;
+        if (session==active) {
+            $("#live").addClass("active").text("Live: "+active);
+        } else {
+            $("#live").addClass("inactive").text("Live: "+active+" ( Me: "+session+")");
+        }
+      }});
     }
 
-	var drag=null;
-	context=initContext('id')
-	function line(x,y,x2,y2) {
-		console.log(x,y,x2,y2);
-		context.beginPath();
-	    context.moveTo(x, y);
-	    context.lineTo(x2, y2);
-	    context.stroke();
-	}
-	function update(event) {
-		if (drag==null) {
-			drag={startX:event.pageX,startY:event.pageY};
-		}
-		drag.pageX=event.pageX;
-		drag.pageY=event.pageY;
-		drag.deltaX=event.pageX-drag.startX;
-		drag.deltaY=event.pageY-drag.startY;
-  	    drag.length=Math.sqrt(drag.deltaX*drag.deltaX+drag.deltaY*drag.deltaY);
-	}
-	function send (action,x,y) {
-		var cx=zoom*x;
-		var cy=zoom*y;
-		var commands=[{action:action,x:cx,y:cy}];
-		$.ajax("/session/"+session, {
-			type : "POST",
-			dataType: "json",
-			contentType: "application/json",
-			processData: false,
-			data: JSON.stringify(commands),
-			success: function(res) {
-				console.log("Res of "+action,res)
-			},
-			error: function(xhr,status,err) {
-				console.log("Error of "+action,err,status)
-			}
-		})
-	}
+    function handleResize() {
+      size={w:$(window).width(),h:$(window).height()}
+      $("#id").attr("width", size.w).attr("height",size.h);
+      zoom=Math.min(table.w/size.w, table.h/size.h)
+      context=initContext('id');
+      console.log(zoom,size.w,size.h);
+    } 
 
-	$( "#id" ).on( TouchMouseEvent.DOWN,  function(event) {
-		if (active!=session) return;
-		event.preventDefault();
-		update(event);
-		log("down");
-		send("move",drag.startX,drag.startY);
-	});
-	
-	$( "#id" ).on( TouchMouseEvent.MOVE,  function(event) {
-		if (active!=session) return;
-		event.preventDefault();
-		if (drag) {
-			update(event);
-			// call callback, when delta 
-			// $("<div class='pen'></div>").appendTo($('#id')).css({top:drag.pageY,left:drag.pageX})
-			if (drag.length>20) {
-				console.log(drag)
-				line(drag.startX,drag.startY,drag.pageX,drag.pageY);
-				send("line",drag.pageX,drag.pageY);
-				log("move");
-				drag=null;
-				update(event);
-			}
-		} else {
-//			console.log("move")
-		}
-	});
+    
+    function log(name) {
+        console.log(name,drag.length,drag.pageX,drag.pageY,drag);
+    }
+    function initContext(id) {
+        var canvas = document.getElementById(id);
+        var context = canvas.getContext('2d');
+              var grd = context.createRadialGradient(0, 0, 3, 0, 0, 10);
+              grd.addColorStop(0, 'rgba(128,128,128,0.5)');
+              grd.addColorStop(1, 'rgba(128,128,128,0.25)');
+              context.strokeStyle = grd;
+              context.lineWidth = 15;
+              context.lineCap = 'butt';
+    //        context.lineCap = 'round';
+    //    context.strokeStyle = 'rgba(255,255,255,0.2)';
+        return context;
+    }
+
+    var drag=null;
+    var context=initContext('id')
+    newSession();
+    $("#live").click(newSession)
+    setInterval(checkStatus,10000);
+    $(window).resize(handleResize);
+    handleResize();
+
+    function line(x,y,x2,y2) {
+        console.log(x,y,x2,y2);
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(x2, y2);
+        context.stroke();
+    }
+
+    function update(event) {
+        if (drag==null) {
+            drag={startX:event.pageX,startY:event.pageY};
+        }
+        drag.pageX=event.pageX;
+        drag.pageY=event.pageY;
+        drag.deltaX=event.pageX-drag.startX;
+        drag.deltaY=event.pageY-drag.startY;
+        drag.length=Math.sqrt(drag.deltaX*drag.deltaX+drag.deltaY*drag.deltaY);
+    }
+
+    function send (action,x,y) {
+        var cx=zoom*x;
+        var cy=zoom*y;
+        var commands=[{action:action,x:cx,y:cy}];
+        $.ajax("/session/"+session, {
+            type : "POST",
+            dataType: "json",
+            contentType: "application/json",
+            processData: false,
+            data: JSON.stringify(commands),
+            success: function(res) {
+                console.log("Res of "+action,res)
+            },
+            error: function(xhr,status,err) {
+                console.log("Error of "+action,err,status)
+            }
+        })
+    }
+
+    $( "#id" ).on( TouchMouseEvent.DOWN,  function(event) {
+        if (active!=session) return;
+        event.preventDefault();
+        update(event);
+        log("down");
+        send("move",drag.startX,drag.startY);
+    });
+    
+    $( "#id" ).on( TouchMouseEvent.MOVE,  function(event) {
+        if (active!=session) return;
+        event.preventDefault();
+        if (drag) {
+            update(event);
+            // call callback, when delta 
+            // $("<div class='pen'></div>").appendTo($('#id')).css({top:drag.pageY,left:drag.pageX})
+            if (drag.length>20) {
+                console.log(drag)
+                line(drag.startX,drag.startY,drag.pageX,drag.pageY);
+                send("line",drag.pageX,drag.pageY);
+                log("move");
+                drag=null;
+                update(event);
+            }
+        } else {
+//          console.log("move")
+        }
+    });
     $("#id").on(TouchMouseEvent.UP, function(event) {
-		if (active!=session) return;
-		event.preventDefault();
-		// call callback
-		log("up");
-		drag=null;
-	});	
-	});
+        if (active!=session) return;
+        event.preventDefault();
+        // call callback
+        log("up");
+        drag=null;
+    }); 
+    });
 </script>
 <style type="text/css" media="screen">
-	body {
-		width : 100%;
-		height: 100%;
-		margin: 0px;
-	}
-	#id {
-		background: url("/assets/img/sand.gif") repeat; 
-		margin: 0px;
-	}
-	.pen {
-		position:absolute;
-		z-index:1;
-		background-color: brown;
-		width:10px;
-		height:10px;
-	}
-	#live {
-		position:absolute;
-		z-index:1;
-		left:5px;top:5px;
-	}
-	.inactive {
-		background-color:lightgray;
-	}
-	.active {
-		background-color:red;
-	}                                                                              
+    body {
+        width : 100%;
+        height: 100%;
+        margin: 0px;
+    }
+    #id {
+        background: url("/assets/img/sand.gif") repeat; 
+        margin: 0px;
+    }
+    .pen {
+        position:absolute;
+        z-index:1;
+        background-color: brown;
+        width:10px;
+        height:10px;
+    }
+    #live {
+        position:absolute;
+        z-index:1;
+        left:5px;top:5px;
+    }
+    .inactive {
+        background-color:lightgray;
+    }
+    .active {
+        background-color:red;
+    }                                                                              
 </style>
 </head>
-	<body>
-		<!--style="min-width:1375;min-height:1030px;"-->
-		<% if ( bambuser_video ) { %>
-			<iframe src="http://embed.bambuser.com/broadcast/<%= bambuser_video %>?autoplay=1&amp;mute=1" 
-			 width="460" height="310" frameborder="0" style="position:absolute;top:10px;right:10px;"></iframe>
-		<% } %>
-		<canvas id="id" width="1375" height="1030" ></canvas>
-		<button id="live">Live</button>
-	</body>
+    <body>
+        <!--style="min-width:1375;min-height:1030px;"-->
+        <% if ( bambuser_video ) { %>
+            <iframe src="http://embed.bambuser.com/broadcast/<%= bambuser_video %>?autoplay=1&amp;mute=1" 
+             width="460" height="310" frameborder="0" style="position:absolute;top:10px;right:10px;"></iframe>
+        <% } %>
+        <canvas id="id" width="1375" height="1030" ></canvas>
+        <button id="live">Live</button>
+    </body>
 </html>

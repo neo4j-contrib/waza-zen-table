@@ -75,6 +75,14 @@ Resolution is an interesting topic in this context as there are several ways of 
  
 Regarding the software.  I have made the firmware which runs on the microcontroller inside the table open source, so you will be able to tinker with it to your heart’s content.  The controller is a 32-bit 8-core device from Parallax.com called a Propeller.  The firmware is written in a mixture of a high level language called Spin and also in assembly.  The same USB virtual COM port which you use to communicate with the table can also be used to re-program the on board firmware.  I will give you access to the firmware code repository soon if you are interested in it?
 
+Flash firmware:
+
+* http://www.fnarfbargle.com/bst.html
+* http://www.fnarfbargle.com/bst/bstl/Latest/
+
+`bstl -p 3 file.eeprom`
+
+
 There used to be several commands for moving the head to specific locations, one which ramped up the acceleration at the beginning of the move then ramped it down at the end, one which moved at a constant speed, another which accelerated or decelerated at a constant rate.  The generated scripts had all sorts of acceleration problems which caused the tables (both desktop and coffee table) to lose steps on the stepper motors, the missed steps would eventually accumulate and the sculpting head you eventually bang into the side of the mechanism.
  
 I decided to resolve the situation by making every one of the move/line commands ALWAYS do the speed-up, move, slow-down for every move in the firmware, no matter what command had been passed in.  This fixes the problem, but when a table is sculpting a script with lots of short moves the mechanism sounds very strange!  Currently the tables sound like the game Space Invaders when that large ship would move across the very top of the screen, making a Wow-Wow-Wow-Wow-Wow sound!  I plan to fix this and make everything beautiful again by moving the smarts which I had hoped for in the website script generator be moved into the firmware.
@@ -86,7 +94,7 @@ There are other commands that the firmware parses, and I do plan to do exactly w
 * Robot.Clear   (clears along both axes)
 * Robot.ClearX
 * Robot.ClearY
-* Robot.MoveTo(float, float)    (this will be the “smart” command which used the return lines to get to a location invisibly)
+* Robot.MoveTo(float, float)    (this is a “smart” command which used the return lines to get to a location invisibly)
 * Robot.LineTo(float, float)    (this command replaces all older drawing commands like MoveToExitSpeed, MoveToSmooth)
 * Robot.WaitSeconds(int)    (usually used at the end of a script file to make the system delay before loading a new pattern file)
 * Robot.WaitMinutes(int)    (see above)
