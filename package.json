@@ -16,8 +16,8 @@
     "ejs": "*"
   },
   "devDependencies": {
+    "serialport":"1.0.6",
     "mocha": "*",
     "rewire": "*"
-    "serialport":"1.0.6",
   }
 }
