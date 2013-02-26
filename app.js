@@ -34,10 +34,16 @@ app.configure('development', function(){
 app.get('/', routes.index);
 app.get('/draw', routes.draw);
 
-var ZEN_TABLE_HOST=process.env.ZEN_TABLE_HOST||"localhost";
+var ZEN_TABLE_TYPE=process.env.ZEN_TABLE_TYPE||"desktop"
+
 var BAMBUSER_API_KEY=process.env.BAMBUSER_API_KEY
 
-app.locals.bambuser_video	=null;
+app.locals.bambuser_video=null;
+
+var TABLES={ desktop: { width:270, height:206 }, coffee: { width:1063, height:629 }}
+app.locals.table_size=TABLES[ZEN_TABLE_TYPE];
+
+console.log("Using table type",ZEN_TABLE_TYPE,"size",app.locals.table_size)
 
 http.get({host:"api.bambuser.com", path: "/broadcast.json?username=neo4j&type=live&limit=3&api_key="+BAMBUSER_API_KEY}, function(res) {
 	if (res.statusCode==200) {
@@ -65,29 +71,6 @@ app.post('/session/:session', routes.add_data)
 app.get('/session/:session', routes.get_data)
 app.get('/session', routes.get_active_data)
 
-function forward_commands(req,res) {
-	var suffix = req.url.split(/\?/)[1];
-	var opts = { host: ZEN_TABLE_HOST , port:3001, path : "/?" + suffix, method:"POST"}
-	console.log("Sending",opts)
-	var req2=http.request(opts,function(res2,err) {
-		// todo consume body?, accept
-		// res2.setEncoding('utf-8')
-		console.log("Send  Status",res2.statusCode,err)
-		var data=""
-		res2.on('data',function(buf) {
-			data += buf.toString();
-		})
-		res2.on('end',function() {
-			console.log("Send  Data",res2.statusCode,data)
-			res.send(res2.statusCode,data);
-		})
-	})
-	req2.on('error',function(err) {
-		console.log("req error",err)
-		 res.send(500,err) 
-	})
-	req2.end();
-}
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });

@@ -1,9 +1,10 @@
 var serial = require('./serial')
 
-var dimTable = { desktop: { width:270, height:206 }, coffee: { width:1063, height:629 }}["desktop"]; // desktop
+var DIMENSIONS = { desktop: { width:270, height:206 }, coffee: { width:1063, height:629 }}
+var dimTable = DIMENSIONS["desktop"]; // desktop
 var not_move_delta = 2;
 
-var last = { x:0, y:0};
+var last = { x:0, y:0 };
 var session;
 var commands;
 var lastCommandIndex = 0;
@@ -111,8 +112,10 @@ var readPort=function(line) {
 
 var port;
 
-exports.init=function(device) {
-    port=serial.connectPort(device,readPort);
+exports.init=function(device,type) {
+   port=serial.connectPort(device,readPort);
+   dimTable = DIMENSIONS[type];
+   console.log("Initialized Table",device,type,dimTable);
 }
 
 function writeToPort(command,next) {

@@ -20,9 +20,10 @@ app.configure(function(){
 });
 
 var WEBAPP=process.env.WEBAPP||"http://zen-table.herokuapp.com";
-var device = process.env.ZEN_TABLE || '/dev/ttyUSB0';
+var DEVICE = process.env.ZEN_TABLE || '/dev/ttyUSB0';
+var TYPE = process.env.ZEN_TABLE_TYPE || 'desktop';
 
-table.init(device);
+table.init(DEVICE,TYPE);
 
 function poll() {
     request(WEBAPP+"/session", { headers: { accept:"application/json"}},function(error, res, body) {

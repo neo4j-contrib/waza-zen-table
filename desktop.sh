@@ -1,0 +1,1 @@
+PORT=3001 ZEN_TABLE="/dev/ttyUSB0" ZEN_TABLE_TYPE="desktop" WEBAPP="http://zen-table.herokuapp.com" node zentable.js
