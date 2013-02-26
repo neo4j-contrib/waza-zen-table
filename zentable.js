@@ -23,6 +23,8 @@ var WEBAPP=process.env.WEBAPP||"http://zen-table.herokuapp.com";
 var DEVICE = process.env.ZEN_TABLE || '/dev/ttyUSB0';
 var TYPE = process.env.ZEN_TABLE_TYPE || 'desktop';
 
+console.log("Initialized",WEBAPP,DEVICE,TYPE)
+
 table.init(DEVICE,TYPE);
 
 function poll() {
