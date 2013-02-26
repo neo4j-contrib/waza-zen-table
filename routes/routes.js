@@ -60,7 +60,7 @@ exports.add_data = function(req,res) {
             return null;
         }).filter(function(x) { return x !=null});
         var size=sessions.addData(session,commands).length;
-		console.log("data",data,commands,size)
+		//console.log("data",data,commands,size)
         return res.send(200,{active:current,size:size});
     })
 };

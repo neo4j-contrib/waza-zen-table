@@ -35,7 +35,7 @@
             dataType: 'json',
             type: "PUT",
             success: function(res) {
-                console.log("checkStatus",res);
+                //console.log("checkStatus",res);
 				checkMakeActive(res.active);
             }
         })
@@ -52,7 +52,7 @@
     function handleResize() {
       size={w:$(window).width(),h:$(window).height()}
       $("#id").attr("width", size.w).attr("height",size.h);
-      zoom=Math.min(table.w/size.w, table.h/size.h)
+      zoom=Math.min(table.width/size.w, table.height/size.h)
       context=initContext('id');
 	  redraw.call();
       console.log(zoom,size.w,size.h);
@@ -60,7 +60,7 @@
 
     
     function log(name) {
-        console.log(name,drag.length,drag.pageX,drag.pageY,drag);
+        //console.log(name,drag.length,drag.pageX,drag.pageY,drag);
     }
     function initContext(id) {
         var canvas = document.getElementById(id);
@@ -85,7 +85,7 @@
     handleResize();
 
     function line(x,y,x2,y2) {
-        console.log(x,y,x2,y2);
+        //console.log(x,y,x2,y2);
         context.beginPath();
         context.moveTo(x, y);
         context.lineTo(x2, y2);
@@ -120,7 +120,7 @@
             processData: false,
             data: JSON.stringify(commands),
             success: function(res) {
-                console.log("Res of "+action,res)
+                //console.log("Res of "+action,res)
             },
             error: function(xhr,status,err) {
                 console.log("Error of "+action,err,status)
@@ -144,7 +144,7 @@
             // call callback, when delta 
             // $("<div class='pen'></div>").appendTo($('#id')).css({top:drag.pageY,left:drag.pageX})
             if (drag.length>20) {
-                console.log(drag)
+                //console.log(drag)
                 line(drag.startX,drag.startY,drag.pageX,drag.pageY);
 				lines.push([drag.startX,drag.startY,drag.pageX,drag.pageY]);
                 send("line",drag.pageX,drag.pageY);
