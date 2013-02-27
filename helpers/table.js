@@ -101,7 +101,7 @@ var readPort=function(line) {
     console.log("line",line);
     if (line.trim()[0]=="{") {
         var state = JSON.parse(line); // queueSlotsFilled queueSlotsAvailable isMoving
-        if (state.queueSlotsAvailable>2) {
+        if (state.queueSlotsAvailable>=5) {
             exports.writeNextAction();
             return;
         }
