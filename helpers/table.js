@@ -52,7 +52,7 @@ exports.actionToCommands= function(action) {
         action.x=0;action.y=0;
     }
     var x = normalize(parseInt(action["x"]), dimTable.width);
-    var y = normalize(parseInt(action["y"]), dimTable.height);
+    var y = dimTable.height - normalize(parseInt(action["y"]), dimTable.height);
 
     var target={x:x, y:y};
     if (!inRange(target)) return action;
@@ -100,8 +100,8 @@ var timeout;
 var readPort=function(line) {
     console.log("line",line);
     if (line.trim()[0]=="{") {
-        var state = JSON.parse(line.replace(/'/g,'"')); // queueSlotsFilled queueSlotsAvailable isMoving
-        if (state.queueSlotsAvailable>0) {
+        var state = JSON.parse(line); // queueSlotsFilled queueSlotsAvailable isMoving
+        if (state.queueSlotsAvailable>2) {
             exports.writeNextAction();
             return;
         }
