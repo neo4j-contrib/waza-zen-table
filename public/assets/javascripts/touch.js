@@ -1,5 +1,3 @@
-(function() {
-    
     /* == GLOBAL DECLERATIONS == */
     TouchMouseEvent = {
         DOWN: "touchmousedown",
@@ -55,16 +53,16 @@
     }
     
     /* == LISTEN TO ORIGINAL EVENT == */
-    var jQueryDocument = $(document);
-   
-    if ("ontouchstart" in window) {
-        jQueryDocument.on("touchstart", onTouchEvent);
-        jQueryDocument.on("touchmove", onTouchEvent);
-        jQueryDocument.on("touchend", onTouchEvent); 
-    } else {
-        jQueryDocument.on("mousedown", onMouseEvent);
-        jQueryDocument.on("mouseup", onMouseEvent);
-        jQueryDocument.on("mousemove", onMouseEvent);
-    }
-    
-})();
+    function registerInputEvents(target) {
+	    var jQueryDocument = $(typeof target == "string" ? $(target) : target);
+
+	    if ("ontouchstart" in window) {
+	        jQueryDocument.on("touchstart", onTouchEvent);
+	        jQueryDocument.on("touchmove", onTouchEvent);
+	        jQueryDocument.on("touchend", onTouchEvent); 
+	    } else {
+	        jQueryDocument.on("mousedown", onMouseEvent);
+	        jQueryDocument.on("mouseup", onMouseEvent);
+	        jQueryDocument.on("mousemove", onMouseEvent);
+	    }
+	}

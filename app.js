@@ -36,6 +36,8 @@ app.get('/draw', routes.draw);
 
 var ZEN_TABLE_TYPE=process.env.ZEN_TABLE_TYPE||"desktop"
 
+process.on('uncaughtException',function(err) { delete err['response']; console.log("Uncaught Error",err); })
+
 var BAMBUSER_API_KEY=process.env.BAMBUSER_API_KEY
 
 app.locals.bambuser_video=null;

@@ -34,20 +34,32 @@
 	<img src="/assets/img/neo4j_logo.gif" id="neo4j"></img>
 <div class="main">
 	    <h1>Welcome - Heroku Waza Zen Table</h1>
-    <p>The Zen Table is an unique mash-up of art and technology. 
-	<a href="http://twitter.com/fnbrit" target="_blank">Simon Hallam</a> put the <a href="http://www.kickstarter.com/projects/fnbrit/zen-table" target="_blank">traditional zen garden into a desktop or coffee-table</a> and then made it work automatically.</p>
+    <p>The Zen Table is an unique mash-up of art and technology. Imagine the spirits of a zen garden coming alive and dutifully working at your command.
+	Inventor <a href="http://twitter.com/fnbrit" target="_blank">Simon Hallam</a> put the <a href="http://www.kickstarter.com/projects/fnbrit/zen-table" target="_blank">traditional zen sand garden into a desktop or coffee-table</a> and then made it work automatically.</p>
 	<blockquote>
 		Zen-Table is an ingenious mechanism consisting of a microcontroller, strong neodynium magnets and a plotter like mechanism to move the "drawing head" across sand on top of a coffee- or desktop-table. Of course the table is programmable. It allows for static images from a SD-card to be drawn in the sand and also dynamic renderings via an USB-port.
 	</blockquote>
+	<p>In the Neo4j lounge you find an installment of two tables, idly drawing patterns in the sand when no one watches. But able to respond to the trace of your fingertip or wits of your mind.</p>
 	<img src="http://3.bp.blogspot.com/-bsaqXwHW8vY/UHl5rGNbiVI/AAAAAAAAAFI/iZvFz0VGGC8/s400/zen-table-desktop.png"></img>
-	<p>Put your own mark onto the Zen Table by <a href="/draw">drawing a symbol on your computer or mobile device.</a>
-	As multiple people want to draw at the same time, you'll be given a token that is claimed as soon as there is a free spot.
+	<h4>Drawing on the table</h4>
+	<p>Put your own mark onto the Zen Table by <a href="/draw">drawing lines on your computer or mobile device.</a>
+	As multiple people want to draw at the same time, you'll be given a token that is claimed as soon as there is a free spot. Each session lasts about 3 minutes.
 	</p>
-	<img src="http://4.bp.blogspot.com/-h_RcVxvvupo/UHl5rgmOBEI/AAAAAAAAAFU/ZxBRWVyEY6Q/s400/heroku_zentable.jpg"></img>
+	<div>	
+<div style="float:left">	<h4>We have a <a href="http://zen-table.herokuapp.com/draw">desktop table</a></h4>
+	<a href="http://zen-table.herokuapp.com/draw"><img src="/assets/img/heroku_zentable.jpg" alt="draw on the desktop table"></img></a>
+</div>
+<div style="float:right">    <h4>and a <a href="http://zen-table.herokuapp.com/draw">coffee table</a> available to draw on</h4>
+	<a href="http://zen-coffee-table.herokuapp.com/draw"><img src="/assets/img/coffee_table.png" alt="draw on the coffee table"></img></a>
+</div></div>
 	<% if ( bambuser_video ) { %>
 		<iframe src="http://embed.bambuser.com/broadcast/<%= bambuser_video %>?autoplay=1&amp;mute=1" 
 		 width="460" height="310" frameborder="0"></iframe>
 	<% } %>
+	
+	<h4>Coding patterns</h4>
+	<p>A real hacker doesn't doodle, he codes the patterns the table should draw. That's we we provide a whole zen like IDE (aka a textarea) for writing Javascript containing <code>Home</code>,<code>LineTo</code> and <code>MoveTo</code> commands. Variables for <code>min.x, min.y, max.x, max.y and center.x, center.y</code> are also available. Check it out.
+	</p>
 	<h3>Resources</h3>
 	<ul>
 		<li><a href="https://github.com/neo4j-contrib/waza-zen-table">SourceCode on GitHub</a></li>
