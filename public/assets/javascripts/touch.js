@@ -45,17 +45,20 @@
     
     /* == NORMALIZE == */
     var normalizeEvent = function(type, original, x, y) {
+		console.log(offset,x,y)
         return $.Event(type, {
-            pageX: x,
-            pageY: y,
+            pageX: x-offset.x,
+            pageY: y-offset.y,
             originalEvent: original
         });
     }
     
+    var offset = {x:0,y:0}
     /* == LISTEN TO ORIGINAL EVENT == */
-    function registerInputEvents(target) {
+    function registerInputEvents(target,dx,dy) {
 	    var jQueryDocument = $(typeof target == "string" ? $(target) : target);
-
+		offset.x=dx||0;
+		offset.y=dy||0;
 	    if ("ontouchstart" in window) {
 	        jQueryDocument.on("touchstart", onTouchEvent);
 	        jQueryDocument.on("touchmove", onTouchEvent);
